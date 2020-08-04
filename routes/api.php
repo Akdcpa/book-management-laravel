@@ -22,16 +22,16 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('register', 'AuthController@store');
 
 }); 
-
-
+ 
 Route::group([
     'middleware' => 'auth:api',
     'prefix'=>'books'
 ], function () {
     Route::post('create', 'BookController@create'); 
-    Route::post('update', 'BookController@update'); 
-    Route::post('delete/soft', 'BookController@softdelete'); 
-    Route::post('delete/hard', 'BookController@harddelete'); 
+    Route::post('update/{id}', 'BookController@update'); 
+    Route::get('edit/{id}', 'BookController@edit'); 
+    Route::delete('delete/soft/{id}', 'BookController@softdelete'); 
+    Route::delete('delete/hard/{id}', 'BookController@harddelete'); 
     Route::get('get', 'BookController@get'); 
     Route::get('send', 'JobController@send');  
     Route::get('email-test', function(){ 
@@ -41,4 +41,5 @@ Route::group([
     });
 
 });
+ 
 

@@ -30,6 +30,7 @@ class BookController extends Controller
                 'description' => $request->description,
                 'user'=>AuthController::getUser()
             ] ;  
+ 
             $book = new BookModel();
             $book->book_name = $request->book_name;
             $book->author = $request->author;
@@ -48,55 +49,78 @@ class BookController extends Controller
         } 
     } 
 
-    public function update(Request $request) {
-        $validation = Validator::make($request->all(), [
-            'id' => 'required', 
-        ]);
+    public function edit($id)
+    {
+        $book = BookModel::find($id);
+        return response()->json($book);
+    }
 
-        if(!$validation->fails()) {
-            $credentials = [
-                'book_name' => $request->book_name,
-                'author' => $request->author,
-                'price' => $request->price,
-                'description' => $request->description,
-                'user_id'=>AuthController::getUserId()
-            ];  
-            $id = $request->id;
-            $book = new BookModel();
-            $val = $book->where('id', $id)->get();
-
-            if($val->count() == 0){ 
-                return ResponseController::Response("book not found", [
-                    "details" => "fails",
-
-                ]) ; 
-               }
-            else{
-
-                $book->where('id', $id)->update($credentials);
-                
-                return ResponseController::Response("updated success", [
-                    "details" => $val, 
-                ]) ; 
-               }
-        } else {
-            return ErrorController::Error(422, $validation->errors()->all()) ;
-        }
+    // update book
+    public function update($id, Request $request)
+    {
+        $book = BookModel::find($id);
+        $credentials = [
+            'book_name' => $request->book_name,
+            'author' => $request->author,
+            'price' => $request->price,
+            'description' => $request->description,
+            'user_id'=>AuthController::getUserId()
+        ];  
         
-    } 
+        $book->where('id',$id)->update($credentials);
 
-    public function softdelete(Request $request) {
-        $validation = Validator::make($request->all(), [
-            'id' => 'required', 
-        ]);
+        return response()->json('The book successfully updated');
+    }
+
+    // public function update($id ,Request $request ) {
+    //     // $validation = Validator::make($request->all(), [
+    //     //     'id' => 'required', 
+    //     // ]);
+
+    //     // if(!$validation->fails()) {
+    //         $credentials = [
+    //             'book_name' => $request->book_name,
+    //             'author' => $request->author,
+    //             'price' => $request->price,
+    //             'description' => $request->description,
+    //             'user_id'=>AuthController::getUserId()
+    //         ];  
+    //         $id = $request->id;
+    //         $book = new BookModel();
+    //         $val = $book->where('id', $id)->get();
+
+    //         if($val->count() == 0){ 
+    //             return ResponseController::Response("book not found", [
+    //                 "details" => "fails",
+
+    //             ]) ; 
+    //            }
+    //         else{
+
+    //             $book->where('id', $id)->update($credentials);
+                
+    //             return ResponseController::Response("updated success", [
+    //                 "details" => $val, 
+    //             ]) ; 
+    //            }
+    //     // } else {
+    //     //     return ErrorController::Error(422, $validation->errors()->all()) ;
+    //     // }
+        
+    // } 
+
+    public function softdelete($id) {
+        // $validation = Validator::make($request->all(), [
+        //     'id' => 'required', 
+        // ]);
 
         $credentials = [
             'delete_flag' => 1, 
         ];  
 
-        if(!$validation->fails()) {
+        // if(!$validation->fails()) {
             
-            $id = $request->id;
+        //     $id = $request->id;
             $book = new BookModel();
             $val = $book->where('id', $id);
 
@@ -116,19 +140,18 @@ class BookController extends Controller
                     "details" => $val, 
                 ]) ; 
                }
-        } else {
-            return ErrorController::Error(422, $validation->errors()->all()) ;
-        } 
+        // } else {
+        //     return ErrorController::Error(422, $validation->errors()->all()) ;
+        // } 
     } 
 
-    public function harddelete(Request $request) {
-        $validation = Validator::make($request->all(), [
-            'id' => 'required', 
-        ]);
+    public function harddelete($id) {
+        // $validation = Validator::make($request->all(), [
+        //     'id' => 'required', 
+        // ]);
 
-        if(!$validation->fails()) {
-            
-            $id = $request->id;
+        // if(!$validation->fails()) {
+             
             $book = new BookModel();
             $val = $book->where('id', $id)->get();
 
@@ -148,19 +171,21 @@ class BookController extends Controller
                     "details" => $data[0], 
                 ]) ; 
                }
-        } else {
-            return ErrorController::Error(422, $validation->errors()->all()) ;
-        } 
+        // } else {
+        //     return ErrorController::Error(422, $validation->errors()->all()) ;
+        // } 
     } 
 
     public function get(Request $request) {
          
             $book = new BookModel();
-            $val = $book->where('delete_flag',0)->get();
+            $val = $book->where('user_id' , Auth::user()->id)->where('delete_flag',0)->get()->toArray();
+            // $books = Book::all()->toArray();
+            // return ResponseController::Response("data retreived success", [
+            //     "details" => $val, 
+            // ]) ;  
 
-            return ResponseController::Response("data retreived success", [
-                "details" => $val, 
-            ]) ;  
+            return array_reverse($val);
     } 
 
 

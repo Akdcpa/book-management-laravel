@@ -28,10 +28,17 @@ class AuthController extends Controller
             if(Auth::attempt($credentials)) { 
                 $user = Auth::user(); 
                 $token = $user->createToken("APP_TOKEN")->accessToken ;
-                return ResponseController::Response("LOGIN_SUCCESS", [
-                    "access_token" => $token,
-                    "user" => Auth::user() 
-                ]) ;
+
+                $user->forceFill([
+                    'api_token' => hash('sha256', $token),
+                ])->save();
+
+                return $token;
+
+                // return ResponseController::Response("LOGIN_SUCCESS", [
+                //     "access_token" => $token,
+                //     "user" => Auth::user() 
+                // ]) ;
             } else {
                 return ErrorController::Error(404, ["Email / Password wrong"]) ;
             }
@@ -43,7 +50,7 @@ class AuthController extends Controller
 
     public function store(Request $request)
     {
-        $validation = VAlidator::make($request->all(), [
+        $validation = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8'
@@ -60,10 +67,7 @@ class AuthController extends Controller
 
             $token = $user->createToken("APP_TOKEN")->accessToken ;
      
-                return ResponseController::Response("Stored book details", [
-                    "access_token" => $token,
-                    "user" => $user 
-                ]) ;
+            return $token;
             
         } else {
             return ErrorController::Error(422, $validation->errors()->all()) ;
